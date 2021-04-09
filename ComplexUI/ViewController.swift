@@ -7,9 +7,9 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UITableViewController {
 
-    private var scrollView: UIScrollView!
+    private let viewModel = ViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,46 +17,58 @@ class ViewController: UIViewController {
         navigationItem.title = "Complex UI"
         navigationController?.navigationBar.prefersLargeTitles = true
         
-        view.backgroundColor = .systemBackground
-        
-        scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
-        
-        let largeSection = HCollectionView(width: UIScreen.main.bounds.width - 48)
-        largeSection.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(largeSection)
-        
-        let mediumSection = HCollectionView(width: UIScreen.main.bounds.width / 1.5)
-        mediumSection.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(mediumSection)
-        
-        let verticalSection = VCollectionView()
-        verticalSection.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(verticalSection)
-        
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            
-            largeSection.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            largeSection.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            largeSection.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            largeSection.heightAnchor.constraint(equalToConstant: 200),
-            
-            mediumSection.topAnchor.constraint(equalTo: largeSection.bottomAnchor, constant: 16),
-            mediumSection.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            mediumSection.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            mediumSection.heightAnchor.constraint(equalToConstant: 150),
-            
-            verticalSection.topAnchor.constraint(equalTo: mediumSection.bottomAnchor, constant: 16),
-            verticalSection.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            verticalSection.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            verticalSection.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
-        ])
-        
+        tableView.backgroundColor = .systemBackground
+        tableView.register(HCell.self, forCellReuseIdentifier: "HCell")
+        tableView.separatorStyle = .none
     }
-  
+    
+}
+
+extension ViewController {
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.section == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "HCell") as! HCell
+            cell.widthCell = 250
+            cell.dataSource = viewModel.colorSection1
+            cell.selectionHandler = { [weak self] color in
+                guard let self = self else { return }
+                self.viewModel.getColor(color: color)
+            }
+            return cell
+        } else if indexPath.section == 1 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "HCell") as! HCell
+            cell.widthCell = 150
+            cell.dataSource = viewModel.colorSection2
+            cell.selectionHandler = { [weak self] color in
+                guard let self = self else { return }
+                self.viewModel.getColor(color: color)
+            }
+            return cell
+        } else {
+            let cell = UITableViewCell()
+            cell.selectionStyle = .none
+            cell.textLabel?.text = "Cell with section \(indexPath.section) and row \(indexPath.row)"
+            return cell
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if indexPath.section == 0 {
+            return 200
+        } else if indexPath.section == 1 {
+            return 175
+        } else {
+            return 64
+        }
+    }
+    
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 3
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return section == 2 ? 10 : 1
+    }
+    
 }
